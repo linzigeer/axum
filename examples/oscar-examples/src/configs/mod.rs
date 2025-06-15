@@ -9,7 +9,7 @@ use anyhow::{anyhow, Context};
 use serde::Deserialize;
 pub use server_config::ServerConfig;
 
-static CONFIG: LazyLock<AppConfig> = LazyLock::new(|| AppConfig::load_config().unwrap());
+static CONFIG: LazyLock<AppConfig> = LazyLock::new(|| AppConfig::load_config().expect("Error occurred while call AppConfig::load_config()"));
 
 #[derive(Debug, Deserialize)]
 pub struct AppConfig {

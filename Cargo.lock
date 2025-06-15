@@ -3746,6 +3746,7 @@ dependencies = [
  "axum",
  "config",
  "num_cpus",
+ "rust_decimal",
  "sea-orm",
  "serde",
  "tokio",

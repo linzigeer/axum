@@ -20,12 +20,10 @@ pub async fn init() -> anyhow::Result<DatabaseConnection> {
         .acquire_timeout(Duration::from_secs(10))
         .connect_timeout(Duration::from_secs(10))
         .min_connections(max(num_cpus::get() as u32 * 2, 10))
-        // .min_connections(3)
         .max_connections(max(num_cpus::get() as u32 * 3, 20))
-        // .max_connections(5)
         .idle_timeout(Duration::from_secs(3600 * 24))
         .max_lifetime(Duration::from_secs(3600 * 24))
-        .sqlx_logging(true)
+        // .sqlx_logging(true)
         // .set_schema_search_path(db_config.schema())
     ;
 
