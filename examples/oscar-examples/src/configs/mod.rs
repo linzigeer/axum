@@ -34,11 +34,11 @@ impl AppConfig {
             .with_context(|| anyhow!("Failed to deserialize configuration"))
     }
 
-    pub fn server_config(&self) -> &ServerConfig {
+    pub fn get_server_config(&self) -> &ServerConfig {
         &self.server_config
     }
 
-    pub fn db_config(&self) -> &DBConfig {
+    pub fn get_db_config(&self) -> &DBConfig {
         &self.db_config
     }
 }

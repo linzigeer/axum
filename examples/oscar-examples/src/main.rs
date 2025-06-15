@@ -1,37 +1,26 @@
+mod app;
 mod configs;
 mod db;
 mod entity;
 mod logger;
+mod server;
 
+use crate::app::AppState;
 use crate::entity::prelude::WmSolTransaction;
 use crate::entity::wm_sol_transaction;
 use axum::extract::{Query, State};
 use axum::response::IntoResponse;
 use axum::{debug_handler, routing, Router};
 use sea_orm::sea_query::{Alias, Expr, Func};
-use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, PaginatorTrait, QueryFilter, QueryOrder, QuerySelect};
-use tokio::net::TcpListener;
+use sea_orm::{ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter, QueryOrder, QuerySelect};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    logger::init();
-    let db_conn = db::init().await?;
     let router = Router::new()
         .route("/", routing::get(say_hello))
-        .route("/trans", routing::get(list_trans))
-        .with_state(db_conn);
+        .route("/trans", routing::get(list_trans));
 
-    let server_config = configs::get_app_config().server_config();
-    let ip = server_config.get_server_ip();
-    let port = server_config.get_server_port();
-    let listener = TcpListener::bind(format!("{ip}:{port}")).await?;
-    tracing::info!(
-        "server is listening on: {:?}",
-        listener.local_addr()?.to_string()
-    );
-    axum::serve(listener, router).await?;
-
-    Ok(())
+    app::run(router).await
 }
 
 #[debug_handler]
@@ -66,7 +55,7 @@ struct PaginationParams {
 
 #[debug_handler]
 async fn list_trans(
-    State(db_conn): State<DatabaseConnection>,
+    State(AppState { db }): State<AppState>,
     Query(params): Query<PaginationParams>,
 ) -> impl IntoResponse {
     let page = params.page.unwrap_or(1);
@@ -105,12 +94,10 @@ async fn list_trans(
             ),
             "sell_count",
         )
-        .filter(
-            wm_sol_transaction::Column::TransferType.eq(0)
-        )
+        .filter(wm_sol_transaction::Column::TransferType.eq(0))
         .order_by_desc(Expr::col(Alias::new("counter")))
         .into_model::<TransSummary>()
-        .paginate(&db_conn, page_size);
+        .paginate(&db, page_size);
 
     // axum::Json(trans)
     // 获取总页数

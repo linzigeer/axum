@@ -6,7 +6,7 @@ use std::cmp::max;
 use std::time::Duration;
 
 pub async fn init() -> anyhow::Result<DatabaseConnection> {
-    let db_config = configs::get_app_config().db_config();
+    let db_config = configs::get_app_config().get_db_config();
     let mut conn_options = ConnectOptions::new(format!(
         "postgres://{}:{}@{}:{}/{}",
         db_config.user(),
